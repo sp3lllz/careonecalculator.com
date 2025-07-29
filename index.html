@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apple Care One Savings Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .option-checkbox:checked + label {
+            border-color: #4f46e5;
+            background-color: #eef2ff;
+        }
+        .option-checkbox:checked + label .price-tag {
+            background-color: #4f46e5;
+            color: white;
+        }
+        .option-checkbox:disabled + label {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #f8fafc;
+        }
+        footer a {
+            color: #3b82f6; /* Blue color for links */
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 flex flex-col items-center justify-center min-h-screen p-4 sm:p-6 lg:p-8">
+
+    <div class="w-full max-w-7xl mx-auto bg-white rounded-2xl shadow-lg p-8">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Apple Care One Calculator</h1>
+            <p class="text-gray-500 max-w-2xl mx-auto">Select up to 3 options to see your potential savings. Note: iPhone prices show theft and loss plan since this is what is covered with Apple Care One</p>
+        </div>
+
+        <!-- Limit Reached Message -->
+        <div id="limit-message" class="hidden bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6 max-w-2xl mx-auto" role="alert">
+          <p class="font-bold">Selection Limit Reached</p>
+          <p>Deselect an option to choose a different one.</p>
+        </div>
+
+        <div id="options-container" class="space-y-10">
+            <!-- iPhones Category -->
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800 border-b pb-3 mb-6">iPhones</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <div class="option">
+                        <input type="checkbox" id="option23" class="option-checkbox hidden" data-price="9.49">
+                        <label for="option23" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">iPhone 11</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$9.49</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="option11" class="option-checkbox hidden" data-price="11.99">
+                        <label for="option11" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">iPhone 11 Pro</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$11.99</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="option12" class="option-checkbox hidden" data-price="11.99">
+                        <label for="option12" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">iPhone 11 Pro Max</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$11.99</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="option22" class="option-checkbox hidden" data-price="9.49">
+                        <label for="option22" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">iPhone 12 Mini</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$9.49</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="option21" class="option-checkbox hidden" data-price="9.49">
+                        <label for="option21" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">iPhone 12</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$9.49</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="option9" class="option-checkbox hidden" data-price="11.99">
+                        <label for="option9" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">iPhone 12 Pro</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$11.99</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="option10" class="option-checkbox hidden" data-price="11.99">
+                        <label for="option10" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">iPhone 12 Pro Max</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$11.99</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="option19" class="option-checkbox hidden" data-price="9.49">
+                        <label for="option19" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">iPhone 13 Mini</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$9.49</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="option20" class="option-checkbox hidden" data-price="9.49">
+                        <label for="option20" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">iPhone 13</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$9.49</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="option8" class="option-checkbox hidden" data-price="11.99">
+                        <label for="option8" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">iPhone 13 Pro</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$11.99</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="option7" class="option-checkbox hidden" data-price="11.99">
+                        <label for="option7" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">iPhone 13 Pro Max</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$11.99</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="option18" class="option-checkbox hidden" data-price="9.49">
+                        <label for="option18" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">iPhone 14</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$9.49</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="option15" class="option-checkbox hidden" data-price="10.99">
+                        <label for="option15" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">iPhone 14 Plus</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$10.99</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="option6" class="option-checkbox hidden" data-price="11.99">
+                        <label for="option6" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">iPhone 14 Pro</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$11.99</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="option5" class="option-checkbox hidden" data-price="11.99">
+                        <label for="option5" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">iPhone 14 Pro Max</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$11.99</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="option17" class="option-checkbox hidden" data-price="9.49">
+                        <label for="option17" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">iPhone 15</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$9.49</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="option14" class="option-checkbox hidden" data-price="10.99">
+                        <label for="option14" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">iPhone 15 Plus</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$10.99</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="option4" class="option-checkbox hidden" data-price="11.99">
+                        <label for="option4" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">iPhone 15 Pro</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$11.99</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="option3" class="option-checkbox hidden" data-price="11.99">
+                        <label for="option3" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">iPhone 15 Pro Max</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$11.99</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="option24" class="option-checkbox hidden" data-price="7.99">
+                        <label for="option24" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">iPhone 16e</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$7.99</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="option16" class="option-checkbox hidden" data-price="9.49">
+                        <label for="option16" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">iPhone 16</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$9.49</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="option13" class="option-checkbox hidden" data-price="10.99">
+                        <label for="option13" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">iPhone 16 Plus</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$10.99</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="option2" class="option-checkbox hidden" data-price="11.99">
+                        <label for="option2" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">iPhone 16 Pro</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$11.99</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="option1" class="option-checkbox hidden" data-price="11.99">
+                        <label for="option1" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">iPhone 16 Pro Max</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$11.99</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- iPads Category -->
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800 border-b pb-3 mb-6">iPads</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <div class="option">
+                        <input type="checkbox" id="ipad1" class="option-checkbox hidden" data-price="3.49">
+                        <label for="ipad1" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">iPad A18</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$3.49</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="ipad2" class="option-checkbox hidden" data-price="3.49">
+                        <label for="ipad2" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">iPad Mini A18</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$3.49</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="ipad3" class="option-checkbox hidden" data-price="3.49">
+                        <label for="ipad3" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">iPad Air</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$3.49</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="ipad4" class="option-checkbox hidden" data-price="3.49">
+                        <label for="ipad4" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">iPad Pro</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$3.49</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Macs Category -->
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800 border-b pb-3 mb-6">Macs</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <div class="option">
+                        <input type="checkbox" id="mac1" class="option-checkbox hidden" data-price="6.99">
+                        <label for="mac1" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">Macbook Air</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$6.99</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="mac2" class="option-checkbox hidden" data-price="6.99">
+                        <label for="mac2" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">Macbook Pro</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$6.99</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="mac3" class="option-checkbox hidden" data-price="6.99">
+                        <label for="mac3" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">iMac</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$6.99</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="mac4" class="option-checkbox hidden" data-price="6.99">
+                        <label for="mac4" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">Mac Mini</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$6.99</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="mac5" class="option-checkbox hidden" data-price="6.99">
+                        <label for="mac5" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">Mac Studio</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$6.99</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="mac6" class="option-checkbox hidden" data-price="6.99">
+                        <label for="mac6" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">Mac Pro</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$6.99</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Apple Watches Category -->
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800 border-b pb-3 mb-6">Apple Watches</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <div class="option">
+                        <input type="checkbox" id="watch1" class="option-checkbox hidden" data-price="2.49">
+                        <label for="watch1" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">Apple Watch SE</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$2.49</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="watch2" class="option-checkbox hidden" data-price="3.99">
+                        <label for="watch2" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">Apple Watch Series 10</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$3.99</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="watch3" class="option-checkbox hidden" data-price="4.99">
+                        <label for="watch3" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">Apple Watch Ultra 2</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$4.99</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Others Category -->
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800 border-b pb-3 mb-6">Others</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <div class="option">
+                        <input type="checkbox" id="other1" class="option-checkbox hidden" data-price="4.99">
+                        <label for="other1" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">Studio Display</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$4.99</span>
+                        </label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="other2" class="option-checkbox hidden" data-price="14.99">
+                        <label for="other2" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
+                            <span class="font-medium text-gray-700">Pro Display XDR</span>
+                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$14.99</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Cost Section -->
+        <div class="border-t-2 border-gray-100 pt-6 mt-10">
+            <div class="flex justify-between items-center mb-4 max-w-sm mx-auto">
+                <span class="text-lg text-gray-600">Total Cost:</span>
+                <span id="total-cost" class="text-2xl font-bold text-gray-800">$0.00</span>
+            </div>
+            <div id="budget-status" class="text-center p-3 rounded-lg text-base font-medium max-w-sm mx-auto">
+                Select an option to start.
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center text-gray-500 text-sm py-8">
+		<p>Airpods, Mac, iPhone and iPad are Trademarks of Apple Inc. and is no way associated with this site.</p>
+		<br>
+		<p>© Patch 2025 </p>
+		<p>Check me out elsewhere on the internet:</p>
+		<a href="https://bsky.app/profile/sp3lllz.net" target="_blank">Blue Sky</a> |
+		<a href="https://sp3lllz.net" target="_blank">My Website</a> |
+		<a href="https://github.com/sp3lllz" target="_blank">GitHub</a> |
+		<a href="https://airpodnoises.net" target="_blank">airpodnoises.net</a>
+    </footer>
+
+    <script>
+        // --- DOM Elements ---
+        const totalCostEl = document.getElementById('total-cost');
+        const budgetStatusEl = document.getElementById('budget-status');
+        const limitMessageEl = document.getElementById('limit-message');
+        const checkboxes = document.querySelectorAll('.option-checkbox');
+
+        // --- Constants ---
+        const budget = 20.00;
+        const maxSelections = 3;
+
+        // --- Functions ---
+
+        /**
+         * Calculates total cost, updates budget status, and manages checkbox states.
+         */
+        function handleSelectionChange() {
+            const checkedCheckboxes = document.querySelectorAll('.option-checkbox:checked');
+            const checkedCount = checkedCheckboxes.length;
+            let currentTotal = 0;
+
+            // Calculate total cost
+            checkedCheckboxes.forEach(checkbox => {
+                currentTotal += parseFloat(checkbox.dataset.price);
+            });
+
+            // Update UI for total and budget
+            totalCostEl.textContent = `$${currentTotal.toFixed(2)}`;
+            updateBudgetStatus(currentTotal);
+
+            // Manage checkbox disabled state and limit message
+            if (checkedCount >= maxSelections) {
+                limitMessageEl.classList.remove('hidden');
+                checkboxes.forEach(cb => {
+                    if (!cb.checked) {
+                        cb.disabled = true;
+                    }
+                });
+            } else {
+                limitMessageEl.classList.add('hidden');
+                checkboxes.forEach(cb => {
+                    cb.disabled = false;
+                });
+            }
+        }
+
+        /**
+         * Updates the budget status message based on the total cost.
+         * @param {number} total - The current total cost.
+         */
+        function updateBudgetStatus(total) {
+            if (total === 0) {
+                budgetStatusEl.textContent = 'Select an option to start.';
+                budgetStatusEl.className = 'text-center p-3 rounded-lg text-base font-medium max-w-sm mx-auto bg-gray-100 text-gray-600';
+            } else if (total > budget) {
+                const savings = total - budget;
+                budgetStatusEl.textContent = `You can save $${savings.toFixed(2)} with Apple Care One`;
+                budgetStatusEl.className = 'text-center p-3 rounded-lg text-base font-medium max-w-sm mx-auto bg-green-100 text-green-800';
+            } else {
+                budgetStatusEl.textContent = `These plans when seperate total $${total.toFixed(2)} you wont save money with Apple Care One`;
+                budgetStatusEl.className = 'text-center p-3 rounded-lg text-base font-medium max-w-sm mx-auto bg-red-100 text-red-800';
+            }
+        }
+
+        // --- Event Listeners ---
+
+        // Add a change event listener to each checkbox
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', handleSelectionChange);
+        });
+
+        // --- Initial Call ---
+        
+        // Run on page load to set the initial state
+        handleSelectionChange();
+    </script>
+
+</body>
+</html>
