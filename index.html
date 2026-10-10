@@ -3,487 +3,456 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apple Care One Savings Calculator</title>
+    <title>AppleCare One Calculator</title>
+    <meta name="description" content="Work out whether AppleCare One saves you money compared with separate AppleCare+ plans. US and UK prices.">
+    <meta name="theme-color" content="#4f46e5">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        .option-checkbox:checked + label {
+        body { font-family: 'Inter', sans-serif; }
+        .device-card { transition: border-color .15s, background-color .15s, transform .1s; }
+        .device-card:active { transform: scale(.98); }
+        .device-input:checked + .device-card {
             border-color: #4f46e5;
             background-color: #eef2ff;
         }
-        .option-checkbox:checked + label .price-tag {
+        .device-input:checked + .device-card .price-tag {
             background-color: #4f46e5;
-            color: white;
+            color: #fff;
         }
-        .option-checkbox:disabled + label {
-            opacity: 0.5;
-            cursor: not-allowed;
-            background-color: #f8fafc;
+        .device-input:checked + .device-card .tick { opacity: 1; transform: scale(1); }
+        .device-input:focus-visible + .device-card { outline: 2px solid #6366f1; outline-offset: 2px; }
+        @media (prefers-color-scheme: dark) {
+            .device-input:checked + .device-card { background-color: rgba(79, 70, 229, .18); }
         }
-        footer a {
-            color: #3b82f6; /* Blue color for links */
+        .tick { opacity: 0; transform: scale(.6); transition: all .15s; }
+        .region-btn[aria-pressed="true"] { background: #fff; color: #111827; box-shadow: 0 1px 2px rgba(0,0,0,.1); }
+        @media (prefers-color-scheme: dark) {
+            .region-btn[aria-pressed="true"] { background: #374151; color: #fff; }
         }
-        footer a:hover {
-            text-decoration: underline;
-        }
+        footer a { color: #6366f1; }
+        footer a:hover { text-decoration: underline; }
     </style>
 </head>
-<body class="bg-gray-50 flex flex-col items-center justify-center min-h-screen p-4 sm:p-6 lg:p-8">
+<body class="bg-gradient-to-b from-indigo-50 via-gray-50 to-gray-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-950 text-gray-800 dark:text-gray-100 min-h-screen">
 
-    <div class="w-full max-w-7xl mx-auto bg-white rounded-2xl shadow-lg p-8">
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">Apple Care One Calculator</h1>
-            <p class="text-gray-500 max-w-2xl mx-auto">Select up to 3 options to see your potential savings. Note: iPhone prices show theft and loss plan since this is what is covered with Apple Care One</p>
-        </div>
-
-        <!-- Limit Reached Message -->
-        <div id="limit-message" class="hidden bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6 max-w-2xl mx-auto" role="alert">
-          <p class="font-bold">Selection Limit Reached</p>
-          <p>Deselect an option to choose a different one.</p>
-        </div>
-
-        <div id="options-container" class="space-y-10">
-            <!-- iPhones Category -->
+    <!-- Header -->
+    <header class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-6">
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div>
-                <h2 class="text-2xl font-bold text-gray-800 border-b pb-3 mb-6">iPhones</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    <div class="option">
-                        <input type="checkbox" id="option23" class="option-checkbox hidden" data-price="9.49">
-                        <label for="option23" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">iPhone 11</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$9.49</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="option11" class="option-checkbox hidden" data-price="11.99">
-                        <label for="option11" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">iPhone 11 Pro</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$11.99</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="option12" class="option-checkbox hidden" data-price="11.99">
-                        <label for="option12" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">iPhone 11 Pro Max</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$11.99</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="option22" class="option-checkbox hidden" data-price="9.49">
-                        <label for="option22" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">iPhone 12 Mini</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$9.49</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="option21" class="option-checkbox hidden" data-price="9.49">
-                        <label for="option21" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">iPhone 12</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$9.49</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="option9" class="option-checkbox hidden" data-price="11.99">
-                        <label for="option9" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">iPhone 12 Pro</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$11.99</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="option10" class="option-checkbox hidden" data-price="11.99">
-                        <label for="option10" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">iPhone 12 Pro Max</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$11.99</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="option19" class="option-checkbox hidden" data-price="9.49">
-                        <label for="option19" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">iPhone 13 Mini</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$9.49</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="option20" class="option-checkbox hidden" data-price="9.49">
-                        <label for="option20" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">iPhone 13</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$9.49</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="option8" class="option-checkbox hidden" data-price="11.99">
-                        <label for="option8" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">iPhone 13 Pro</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$11.99</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="option7" class="option-checkbox hidden" data-price="11.99">
-                        <label for="option7" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">iPhone 13 Pro Max</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$11.99</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="option18" class="option-checkbox hidden" data-price="9.49">
-                        <label for="option18" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">iPhone 14</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$9.49</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="option15" class="option-checkbox hidden" data-price="10.99">
-                        <label for="option15" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">iPhone 14 Plus</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$10.99</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="option6" class="option-checkbox hidden" data-price="11.99">
-                        <label for="option6" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">iPhone 14 Pro</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$11.99</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="option5" class="option-checkbox hidden" data-price="11.99">
-                        <label for="option5" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">iPhone 14 Pro Max</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$11.99</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="option17" class="option-checkbox hidden" data-price="9.49">
-                        <label for="option17" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">iPhone 15</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$9.49</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="option14" class="option-checkbox hidden" data-price="10.99">
-                        <label for="option14" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">iPhone 15 Plus</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$10.99</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="option4" class="option-checkbox hidden" data-price="11.99">
-                        <label for="option4" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">iPhone 15 Pro</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$11.99</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="option3" class="option-checkbox hidden" data-price="11.99">
-                        <label for="option3" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">iPhone 15 Pro Max</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$11.99</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="option24" class="option-checkbox hidden" data-price="7.99">
-                        <label for="option24" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">iPhone 16e</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$7.99</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="option16" class="option-checkbox hidden" data-price="9.49">
-                        <label for="option16" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">iPhone 16</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$9.49</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="option13" class="option-checkbox hidden" data-price="10.99">
-                        <label for="option13" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">iPhone 16 Plus</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$10.99</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="option2" class="option-checkbox hidden" data-price="11.99">
-                        <label for="option2" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">iPhone 16 Pro</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$11.99</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="option1" class="option-checkbox hidden" data-price="11.99">
-                        <label for="option1" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">iPhone 16 Pro Max</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$11.99</span>
-                        </label>
-                    </div>
-                </div>
+                <p class="text-sm font-semibold text-indigo-600 dark:text-indigo-400 tracking-wide uppercase mb-2">Savings calculator</p>
+                <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight">AppleCare One Calculator</h1>
+                <p class="mt-3 text-gray-600 dark:text-gray-400 max-w-2xl">
+                    Pick the devices you want covered and see whether one <span id="one-price-inline" class="font-semibold text-gray-800 dark:text-gray-200"></span> AppleCare One plan beats paying for separate AppleCare+ plans.
+                </p>
             </div>
-
-            <!-- iPads Category -->
-            <div>
-                <h2 class="text-2xl font-bold text-gray-800 border-b pb-3 mb-6">iPads</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    <div class="option">
-                        <input type="checkbox" id="ipad1" class="option-checkbox hidden" data-price="3.49">
-                        <label for="ipad1" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">iPad A18</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$3.49</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="ipad2" class="option-checkbox hidden" data-price="3.49">
-                        <label for="ipad2" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">iPad Mini A18</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$3.49</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="ipad3" class="option-checkbox hidden" data-price="3.49">
-                        <label for="ipad3" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">iPad Air</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$3.49</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="ipad4" class="option-checkbox hidden" data-price="3.49">
-                        <label for="ipad4" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">iPad Pro</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$3.49</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Macs Category -->
-            <div>
-                <h2 class="text-2xl font-bold text-gray-800 border-b pb-3 mb-6">Macs</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    <div class="option">
-                        <input type="checkbox" id="mac1" class="option-checkbox hidden" data-price="6.99">
-                        <label for="mac1" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">Macbook Air</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$6.99</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="mac2" class="option-checkbox hidden" data-price="6.99">
-                        <label for="mac2" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">Macbook Pro</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$6.99</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="mac3" class="option-checkbox hidden" data-price="6.99">
-                        <label for="mac3" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">iMac</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$6.99</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="mac4" class="option-checkbox hidden" data-price="6.99">
-                        <label for="mac4" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">Mac Mini</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$6.99</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="mac5" class="option-checkbox hidden" data-price="6.99">
-                        <label for="mac5" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">Mac Studio</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$6.99</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="mac6" class="option-checkbox hidden" data-price="6.99">
-                        <label for="mac6" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">Mac Pro</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$6.99</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Apple Watches Category -->
-            <div>
-                <h2 class="text-2xl font-bold text-gray-800 border-b pb-3 mb-6">Apple Watches</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    <div class="option">
-                        <input type="checkbox" id="watch1" class="option-checkbox hidden" data-price="2.49">
-                        <label for="watch1" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">Apple Watch SE</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$2.49</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="watch2" class="option-checkbox hidden" data-price="3.99">
-                        <label for="watch2" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">Apple Watch Series 10</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$3.99</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="watch3" class="option-checkbox hidden" data-price="4.99">
-                        <label for="watch3" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">Apple Watch Ultra 2</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$4.99</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Others Category -->
-            <div>
-                <h2 class="text-2xl font-bold text-gray-800 border-b pb-3 mb-6">Others</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    <div class="option">
-                        <input type="checkbox" id="other1" class="option-checkbox hidden" data-price="4.99">
-                        <label for="other1" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">Studio Display</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$4.99</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="other2" class="option-checkbox hidden" data-price="14.99">
-                        <label for="other2" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">Pro Display XDR</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$14.99</span>
-                        </label>
-                    </div>
-                     <div class="option">
-                        <input type="checkbox" id="other3" class="option-checkbox hidden" data-price="5.99">
-                        <label for="other3" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">AirPods 4</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$5.99</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="other4" class="option-checkbox hidden" data-price="5.99">
-                        <label for="other4" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">Airpods Pro 2</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$5.99</span>
-                        </label>
-                    </div>
-                    <div class="option">
-                        <input type="checkbox" id="other5" class="option-checkbox hidden" data-price="9.99">
-                        <label for="other5" class="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-200 hover:border-indigo-500 h-full">
-                            <span class="font-medium text-gray-700">Airpods Max</span>
-                            <span class="price-tag bg-gray-200 text-gray-800 font-semibold px-3 py-1 rounded-full text-sm transition-all duration-200">$9.99</span>
-                        </label>
-                    </div>
+            <div class="flex flex-col items-start md:items-end gap-2">
+                <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Region</span>
+                <div class="inline-flex p-1 rounded-xl bg-gray-200/70 dark:bg-gray-800" role="group" aria-label="Choose region">
+                    <button type="button" data-region="us" class="region-btn px-4 py-2 rounded-lg text-sm font-semibold text-gray-600 dark:text-gray-300 transition">🇺🇸 United States</button>
+                    <button type="button" data-region="uk" class="region-btn px-4 py-2 rounded-lg text-sm font-semibold text-gray-600 dark:text-gray-300 transition">🇬🇧 United Kingdom</button>
                 </div>
             </div>
         </div>
+    </header>
 
-        <!-- Total Cost Section -->
-        <div class="border-t-2 border-gray-100 pt-6 mt-10">
-            <div class="flex justify-between items-center mb-4 max-w-sm mx-auto">
-                <span class="text-lg text-gray-600">Total Cost:</span>
-                <span id="total-cost" class="text-2xl font-bold text-gray-800">$0.00</span>
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-40 lg:pb-16 grid lg:grid-cols-[1fr_360px] gap-8 items-start">
+
+        <!-- Device picker -->
+        <section aria-label="Devices" class="min-w-0">
+            <div class="sticky top-0 z-10 -mx-4 px-4 sm:mx-0 sm:px-0 py-3 bg-gray-50/90 dark:bg-gray-950/90 backdrop-blur">
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <label class="relative flex-1">
+                        <span class="sr-only">Search devices</span>
+                        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+                        <input id="search" type="search" placeholder="Search devices, e.g. 17 Pro" class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </label>
+                    <div id="category-tabs" class="flex gap-2 overflow-x-auto pb-1 sm:pb-0"></div>
+                </div>
             </div>
-            <div id="budget-status" class="text-center p-3 rounded-lg text-base font-medium max-w-sm mx-auto">
-                Select an option to start.
+
+            <div id="categories" class="space-y-10 mt-4"></div>
+            <p id="no-results" class="hidden text-center text-gray-500 py-12">No devices match your search.</p>
+
+            <!-- Custom device -->
+            <div class="mt-10 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 p-5">
+                <h2 class="font-bold text-lg">Price different, or device missing?</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Add your own device with the monthly AppleCare+ price Apple quoted you.</p>
+                <form id="custom-form" class="mt-4 flex flex-col sm:flex-row gap-3">
+                    <input id="custom-name" required maxlength="40" placeholder="Device name" class="flex-1 px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <div class="relative sm:w-40">
+                        <span id="custom-currency" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                        <input id="custom-price" required type="number" min="0" step="0.01" inputmode="decimal" placeholder="per month" class="w-full pl-7 pr-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <button class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold">Add</button>
+                </form>
             </div>
+        </section>
+
+        <!-- Summary (desktop sidebar) -->
+        <aside class="hidden lg:block sticky top-6">
+            <div class="rounded-2xl bg-white dark:bg-gray-900 shadow-xl shadow-indigo-900/5 ring-1 ring-gray-200 dark:ring-gray-800 p-6">
+                <h2 class="font-bold text-lg mb-4">Your selection</h2>
+                <ul id="selected-list" class="space-y-2 text-sm mb-5 max-h-64 overflow-y-auto"></ul>
+                <dl class="space-y-2 text-sm border-t border-gray-100 dark:border-gray-800 pt-4">
+                    <div class="flex justify-between"><dt class="text-gray-500 dark:text-gray-400">Separate AppleCare+</dt><dd id="sum-individual" class="font-semibold tabular-nums"></dd></div>
+                    <div class="flex justify-between"><dt class="text-gray-500 dark:text-gray-400">AppleCare One</dt><dd id="sum-one" class="font-semibold tabular-nums"></dd></div>
+                    <div id="sum-one-detail" class="text-xs text-gray-400 text-right"></div>
+                </dl>
+                <div id="verdict" class="mt-5 rounded-xl p-4 text-center"></div>
+                <button type="button" class="clear-btn mt-4 w-full text-sm text-gray-500 hover:text-gray-800 dark:hover:text-gray-200">Clear selection</button>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Summary (mobile bottom bar) -->
+    <div class="lg:hidden fixed bottom-0 inset-x-0 z-20 bg-white/95 dark:bg-gray-900/95 backdrop-blur border-t border-gray-200 dark:border-gray-800 px-4 py-3 shadow-2xl">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+            <div class="text-sm">
+                <div><span class="text-gray-500 dark:text-gray-400">Separate:</span> <span id="m-individual" class="font-semibold tabular-nums"></span></div>
+                <div><span class="text-gray-500 dark:text-gray-400">AppleCare One:</span> <span id="m-one" class="font-semibold tabular-nums"></span></div>
+            </div>
+            <div id="m-verdict" class="rounded-xl px-3 py-2 text-sm font-semibold text-right"></div>
         </div>
     </div>
 
-    <footer class="text-center text-gray-500 text-sm py-8">
-		<p>Airpods, Mac, iPhone and iPad are Trademarks of Apple Inc. and is no way associated with this site.</p>
-		<br>
-		<p>© Patch 2025 </p>
-		<p>Check me out elsewhere on the internet:</p>
-		<a href="https://bsky.app/profile/sp3lllz.net" target="_blank">Blue Sky</a> |
-		<a href="https://sp3lllz.net" target="_blank">My Website</a> |
-		<a href="https://github.com/sp3lllz" target="_blank">GitHub</a> |
-		<a href="https://airpodnoises.net" target="_blank">airpodnoises.net</a>
+    <!-- Notes -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
+        <div class="rounded-2xl bg-white dark:bg-gray-900 ring-1 ring-gray-200 dark:ring-gray-800 p-6 text-sm text-gray-600 dark:text-gray-400 space-y-2">
+            <h2 class="font-bold text-base text-gray-800 dark:text-gray-100">How this works</h2>
+            <ul id="notes" class="list-disc pl-5 space-y-1"></ul>
+            <p class="pt-2 text-xs">Prices last checked <strong id="checked-date"></strong>. Prices marked <span class="inline-block align-middle text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">est</span> are estimates where Apple hasn't published a monthly price (or we couldn't confirm it). Always check the price Apple quotes you.</p>
+        </div>
+    </section>
+
+    <footer class="text-center text-gray-500 dark:text-gray-400 text-sm pb-28 lg:pb-10 px-4 space-y-2">
+        <p>AirPods, Mac, iPhone, iPad, Apple Watch and AppleCare are trademarks of Apple Inc. This site is in no way associated with Apple.</p>
+        <p>© Patch 2025–<span id="year"></span></p>
+        <p>Check me out elsewhere on the internet:</p>
+        <p>
+            <a href="https://bsky.app/profile/sp3lllz.net" target="_blank" rel="noopener">Blue Sky</a> |
+            <a href="https://sp3lllz.net" target="_blank" rel="noopener">My Website</a> |
+            <a href="https://github.com/sp3lllz" target="_blank" rel="noopener">GitHub</a> |
+            <a href="https://airpodnoises.net" target="_blank" rel="noopener">airpodnoises.net</a>
+        </p>
     </footer>
 
     <script>
-        // --- DOM Elements ---
-        const totalCostEl = document.getElementById('total-cost');
-        const budgetStatusEl = document.getElementById('budget-status');
-        const limitMessageEl = document.getElementById('limit-message');
-        const checkboxes = document.querySelectorAll('.option-checkbox');
+        // ---------------------------------------------------------------
+        // Pricing data. Edit prices here.
+        // Each device: [id, name, usPrice, ukPrice, flags]
+        //   flags: 'u' = US price is an estimate, 'k' = UK price is an estimate
+        // iPhone, iPad and Apple Watch use AppleCare+ with Theft & Loss prices
+        // where available, since AppleCare One includes theft & loss for them.
+        // ---------------------------------------------------------------
+        const PRICES_CHECKED = 'October 2026';
 
-        // --- Constants ---
-        const budget = 20.00;
-        const maxSelections = 3;
+        const REGIONS = {
+            us: {
+                locale: 'en-US', currency: 'USD', symbol: '$',
+                onePrice: 19.99,      // covers up to 3 devices
+                extraDevice: 5.99,    // each device after the first 3
+                notes: [
+                    'AppleCare One costs $19.99/month for up to 3 devices, plus $5.99/month for each extra device.',
+                    'iPhone and Apple Watch prices are AppleCare+ with Theft & Loss, because AppleCare One includes theft & loss for iPhone, iPad and Apple Watch.',
+                    'AirPods only have upfront 2-year AppleCare+ plans in the US, so they are shown as the monthly equivalent (2-year price ÷ 24).',
+                    'Devices you already own can be added if they are up to 4 years old and in good condition (age limit does not apply to AirPods).',
+                    'Covering a whole household? AppleCare One Family is $49.99/month for up to 6 people in a Family Sharing group.',
+                ],
+            },
+            uk: {
+                locale: 'en-GB', currency: 'GBP', symbol: '£',
+                onePrice: 16.99,
+                extraDevice: 4.99,
+                notes: [
+                    'AppleCare One costs £16.99/month for up to 3 devices, plus £4.99/month for each extra device. It launched in the UK in August 2026.',
+                    'iPhone prices are AppleCare+ with Theft & Loss, because AppleCare One includes theft & loss for iPhone, iPad and Apple Watch.',
+                    'Some UK monthly prices (especially Macs) aren\'t easy to confirm, so they are marked as estimates.',
+                    'Devices you already own can be added if they are up to 4 years old and in good condition.',
+                ],
+            },
+        };
 
-        // --- Functions ---
+        const CATEGORIES = [
+            { id: 'iphone', name: 'iPhone', icon: '📱', devices: [
+                ['ip18pm', 'iPhone 18 Pro Max', 14.99, 12.99, 'uk'],
+                ['ip18p',  'iPhone 18 Pro',     14.99, 12.99, 'uk'],
+                ['ip17pm', 'iPhone 17 Pro Max', 13.99, 11.99],
+                ['ip17p',  'iPhone 17 Pro',     13.99, 11.99],
+                ['ipair',  'iPhone Air',        13.99, 11.99],
+                ['ip17',   'iPhone 17',         11.99,  9.49],
+                ['ip17e',  'iPhone 17e',        10.99,  7.99, 'u'],
+                ['ip16pm', 'iPhone 16 Pro Max', 13.99, 11.99],
+                ['ip16p',  'iPhone 16 Pro',     13.99, 11.99],
+                ['ip16pl', 'iPhone 16 Plus',    12.99, 10.99],
+                ['ip16',   'iPhone 16',         11.99,  9.49],
+                ['ip16e',  'iPhone 16e',         9.99,  7.99],
+                ['ip15pm', 'iPhone 15 Pro Max', 13.99, 11.99],
+                ['ip15p',  'iPhone 15 Pro',     13.99, 11.99],
+                ['ip15pl', 'iPhone 15 Plus',    12.99, 10.99],
+                ['ip15',   'iPhone 15',         11.99,  9.49],
+                ['ip14pm', 'iPhone 14 Pro Max', 13.99, 11.99],
+                ['ip14p',  'iPhone 14 Pro',     13.99, 11.99],
+                ['ip14pl', 'iPhone 14 Plus',    12.99, 10.99],
+                ['ip14',   'iPhone 14',         11.99,  9.49],
+            ]},
+            { id: 'ipad', name: 'iPad', icon: '📲', devices: [
+                ['ipadpro13', 'iPad Pro 13-inch', 11.99, 8.49, 'k'],
+                ['ipadpro11', 'iPad Pro 11-inch', 10.99, 7.49, 'k'],
+                ['ipadair13', 'iPad Air 13-inch',  7.99, 4.99, 'k'],
+                ['ipadair11', 'iPad Air 11-inch',  6.99, 3.99, 'k'],
+                ['ipad',      'iPad',              5.99, 3.49],
+                ['ipadmini',  'iPad mini',         5.99, 3.49],
+            ]},
+            { id: 'mac', name: 'Mac', icon: '💻', devices: [
+                ['mbneo',  'MacBook Neo',            5.99,  4.99, 'k'],
+                ['mba13',  'MacBook Air 13-inch',    7.99,  6.99, 'k'],
+                ['mba15',  'MacBook Air 15-inch',    8.99,  7.99, 'k'],
+                ['mbp14',  'MacBook Pro 14-inch',   10.99,  9.99, 'k'],
+                ['mbp16',  'MacBook Pro 16-inch',   15.99, 14.99, 'k'],
+                ['imac',   'iMac',                   6.99,  6.99, 'k'],
+                ['macmini','Mac mini',               4.49,  3.99, 'k'],
+                ['studio', 'Mac Studio',             6.99,  6.99, 'k'],
+                ['macpro', 'Mac Pro',               18.49, 16.99, 'k'],
+            ]},
+            { id: 'watch', name: 'Apple Watch', icon: '⌚', devices: [
+                ['wultra4', 'Apple Watch Ultra 4',          5.99, 4.99, 'u'],
+                ['wultra',  'Apple Watch Ultra 2 / 3',      5.99, 4.99],
+                ['ws12',    'Apple Watch Series 12',        4.99, 3.99, 'u'],
+                ['ws',      'Apple Watch Series 9 / 10 / 11', 4.99, 3.99],
+                ['wse',     'Apple Watch SE',               2.99, 2.49],
+            ]},
+            { id: 'audio', name: 'AirPods & Displays', icon: '🎧', devices: [
+                ['apmax',  'AirPods Max',      2.46, 2.99, 'uk'],
+                ['appro3', 'AirPods Pro 3',    1.63, 1.99, 'u'],
+                ['appro2', 'AirPods Pro 2',    1.21, 1.99, 'uk'],
+                ['ap5',    'AirPods 5',        1.21, 1.99, 'uk'],
+                ['ap4',    'AirPods 4',        1.21, 1.99, 'uk'],
+                ['studiodisplay', 'Studio Display', 4.99, 4.99, 'k'],
+                ['xdr',    'Pro Display XDR', 14.99, 14.99, 'uk'],
+            ]},
+        ];
 
-        /**
-         * Calculates total cost, updates budget status, and manages checkbox states.
-         */
-        function handleSelectionChange() {
-            const checkedCheckboxes = document.querySelectorAll('.option-checkbox:checked');
-            const checkedCount = checkedCheckboxes.length;
-            let currentTotal = 0;
+        // --- State ---
+        const store = {
+            get(key) { try { return localStorage.getItem(key); } catch { return null; } },
+            set(key, val) { try { localStorage.setItem(key, val); } catch {} },
+        };
+        const detectRegion = () => {
+            const q = new URLSearchParams(location.search).get('region');
+            if (q === 'us' || q === 'uk') return q;
+            const saved = store.get('region');
+            if (saved === 'us' || saved === 'uk') return saved;
+            return /-(GB|UK)$/i.test(navigator.language || '') ? 'uk' : 'us';
+        };
+        let region = detectRegion();
+        const selected = new Set();
+        const custom = []; // { id, name, price } – price in current region's currency
+        let customCount = 0;
 
-            // Calculate total cost
-            checkedCheckboxes.forEach(checkbox => {
-                currentTotal += parseFloat(checkbox.dataset.price);
+        // --- Helpers ---
+        const $ = (id) => document.getElementById(id);
+        const fmt = (n) => new Intl.NumberFormat(REGIONS[region].locale, { style: 'currency', currency: REGIONS[region].currency }).format(n);
+        const allDevices = () => CATEGORIES.flatMap(c => c.devices.map(d => ({
+            id: d[0], name: d[1],
+            price: region === 'us' ? d[2] : d[3],
+            est: (d[4] || '').includes(region === 'us' ? 'u' : 'k'),
+        })));
+        const escapeHtml = (s) => s.replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+
+        // --- Rendering ---
+        function renderTabs() {
+            $('category-tabs').innerHTML = CATEGORIES.map(c =>
+                `<a href="#cat-${c.id}" class="shrink-0 px-3 py-2 rounded-xl text-sm font-medium bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-indigo-400 whitespace-nowrap">${c.icon} ${c.name}</a>`
+            ).join('');
+        }
+
+        function deviceCard(id, name, price, est, removable) {
+            return `
+                <div class="device" data-name="${escapeHtml(name.toLowerCase())}">
+                    <input type="checkbox" id="d-${id}" value="${id}" class="device-input sr-only" ${selected.has(id) ? 'checked' : ''}>
+                    <label for="d-${id}" class="device-card h-full flex items-center justify-between gap-3 p-4 rounded-xl border-2 border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 cursor-pointer hover:border-indigo-400">
+                        <span class="flex items-center gap-2 min-w-0">
+                            <span class="tick shrink-0 w-5 h-5 rounded-full bg-indigo-600 text-white grid place-items-center text-xs">✓</span>
+                            <span class="font-medium leading-snug">${escapeHtml(name)}</span>
+                        </span>
+                        <span class="flex items-center gap-1.5 shrink-0">
+                            ${est ? '<span class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300" title="Estimated price">est</span>' : ''}
+                            <span class="price-tag bg-gray-100 dark:bg-gray-800 font-semibold px-3 py-1 rounded-full text-sm tabular-nums">${fmt(price)}</span>
+                            ${removable ? `<button type="button" data-remove="${id}" class="ml-1 text-gray-400 hover:text-red-500" aria-label="Remove ${escapeHtml(name)}">✕</button>` : ''}
+                        </span>
+                    </label>
+                </div>`;
+        }
+
+        function renderDevices() {
+            const devices = allDevices();
+            const byId = Object.fromEntries(devices.map(d => [d.id, d]));
+            let html = CATEGORIES.map(c => `
+                <div id="cat-${c.id}" class="category scroll-mt-24">
+                    <h2 class="flex items-center gap-2 text-xl font-bold mb-4"><span>${c.icon}</span>${c.name}</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-3">
+                        ${c.devices.map(d => { const x = byId[d[0]]; return deviceCard(x.id, x.name, x.price, x.est, false); }).join('')}
+                    </div>
+                </div>`).join('');
+            if (custom.length) {
+                html += `
+                <div id="cat-custom" class="category">
+                    <h2 class="flex items-center gap-2 text-xl font-bold mb-4"><span>✏️</span>Your devices</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-3">
+                        ${custom.map(d => deviceCard(d.id, d.name, d.price, false, true)).join('')}
+                    </div>
+                </div>`;
+            }
+            $('categories').innerHTML = html;
+            applySearch();
+        }
+
+        function renderStatic() {
+            const r = REGIONS[region];
+            document.documentElement.lang = r.locale;
+            document.querySelectorAll('.region-btn').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.region === region)));
+            $('one-price-inline').textContent = `${fmt(r.onePrice)}/month`;
+            $('custom-currency').textContent = r.symbol;
+            $('notes').innerHTML = r.notes.map(n => `<li>${escapeHtml(n)}</li>`).join('');
+            $('checked-date').textContent = PRICES_CHECKED;
+            $('year').textContent = new Date().getFullYear();
+        }
+
+        function update() {
+            const r = REGIONS[region];
+            const lookup = Object.fromEntries([...allDevices(), ...custom].map(d => [d.id, d]));
+            const items = [...selected].map(id => lookup[id]).filter(Boolean);
+            const count = items.length;
+            const individual = items.reduce((s, d) => s + d.price, 0);
+            const extras = Math.max(0, count - 3);
+            const one = count ? r.onePrice + extras * r.extraDevice : 0;
+            const diff = individual - one;
+
+            $('selected-list').innerHTML = count
+                ? items.map(d => `<li class="flex justify-between gap-2"><span class="truncate">${escapeHtml(d.name)}</span><span class="tabular-nums text-gray-500 dark:text-gray-400">${fmt(d.price)}</span></li>`).join('')
+                : '<li class="text-gray-400">Nothing selected yet.</li>';
+            $('sum-individual').textContent = `${fmt(individual)}/mo`;
+            $('sum-one').textContent = `${fmt(one)}/mo`;
+            $('sum-one-detail').textContent = extras
+                ? `${fmt(r.onePrice)} for 3 + ${extras} extra × ${fmt(r.extraDevice)}`
+                : count ? `${count} of 3 included devices used` : '';
+            $('m-individual').textContent = `${fmt(individual)}/mo`;
+            $('m-one').textContent = `${fmt(one)}/mo`;
+
+            const verdict = $('verdict');
+            const mVerdict = $('m-verdict');
+            if (!count) {
+                verdict.className = 'mt-5 rounded-xl p-4 text-center bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300';
+                verdict.innerHTML = 'Select a device to start.';
+                mVerdict.className = 'rounded-xl px-3 py-2 text-sm font-semibold text-right text-gray-500';
+                mVerdict.textContent = 'Pick devices';
+            } else if (diff > 0.004) {
+                verdict.className = 'mt-5 rounded-xl p-4 text-center bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300';
+                verdict.innerHTML = `<div class="text-sm font-medium">AppleCare One saves you</div>
+                    <div class="text-3xl font-extrabold tabular-nums my-1">${fmt(diff)}<span class="text-base font-semibold">/mo</span></div>
+                    <div class="text-sm">That's ${fmt(diff * 12)} a year 🎉</div>`;
+                mVerdict.className = 'rounded-xl px-3 py-2 text-sm font-semibold text-right bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300';
+                mVerdict.innerHTML = `Save ${fmt(diff)}/mo<br><span class="font-normal text-xs">${fmt(diff * 12)}/yr</span>`;
+            } else if (diff > -0.004) {
+                verdict.className = 'mt-5 rounded-xl p-4 text-center bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300';
+                verdict.innerHTML = 'It costs the same either way.';
+                mVerdict.className = 'rounded-xl px-3 py-2 text-sm font-semibold text-right bg-gray-100 dark:bg-gray-800';
+                mVerdict.textContent = 'Same price';
+            } else {
+                verdict.className = 'mt-5 rounded-xl p-4 text-center bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300';
+                verdict.innerHTML = `<div class="text-sm font-medium">Separate AppleCare+ is cheaper by</div>
+                    <div class="text-3xl font-extrabold tabular-nums my-1">${fmt(-diff)}<span class="text-base font-semibold">/mo</span></div>
+                    <div class="text-sm">AppleCare One won't save you money here.</div>`;
+                mVerdict.className = 'rounded-xl px-3 py-2 text-sm font-semibold text-right bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300';
+                mVerdict.innerHTML = `Costs ${fmt(-diff)}/mo more`;
+            }
+        }
+
+        function applySearch() {
+            const q = $('search').value.trim().toLowerCase();
+            let any = false;
+            document.querySelectorAll('.category').forEach(cat => {
+                let visible = 0;
+                cat.querySelectorAll('.device').forEach(el => {
+                    const show = !q || el.dataset.name.includes(q);
+                    el.classList.toggle('hidden', !show);
+                    if (show) visible++;
+                });
+                cat.classList.toggle('hidden', visible === 0);
+                if (visible) any = true;
             });
-
-            // Update UI for total and budget
-            totalCostEl.textContent = `$${currentTotal.toFixed(2)}`;
-            updateBudgetStatus(currentTotal);
-
-            // Manage checkbox disabled state and limit message
-            if (checkedCount >= maxSelections) {
-                limitMessageEl.classList.remove('hidden');
-                checkboxes.forEach(cb => {
-                    if (!cb.checked) {
-                        cb.disabled = true;
-                    }
-                });
-            } else {
-                limitMessageEl.classList.add('hidden');
-                checkboxes.forEach(cb => {
-                    cb.disabled = false;
-                });
-            }
+            $('no-results').classList.toggle('hidden', any);
         }
 
-        /**
-         * Updates the budget status message based on the total cost.
-         * @param {number} total - The current total cost.
-         */
-        function updateBudgetStatus(total) {
-            if (total === 0) {
-                budgetStatusEl.textContent = 'Select an option to start.';
-                budgetStatusEl.className = 'text-center p-3 rounded-lg text-base font-medium max-w-sm mx-auto bg-gray-100 text-gray-600';
-            } else if (total > budget) {
-                const savings = total - budget;
-                budgetStatusEl.textContent = `You can save $${savings.toFixed(2)} with Apple Care One`;
-                budgetStatusEl.className = 'text-center p-3 rounded-lg text-base font-medium max-w-sm mx-auto bg-green-100 text-green-800';
-            } else {
-                budgetStatusEl.textContent = `These plans when seperate total $${total.toFixed(2)} you wont save money with Apple Care One`;
-                budgetStatusEl.className = 'text-center p-3 rounded-lg text-base font-medium max-w-sm mx-auto bg-red-100 text-red-800';
-            }
-        }
-
-        // --- Event Listeners ---
-
-        // Add a change event listener to each checkbox
-        checkboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', handleSelectionChange);
+        // --- Events ---
+        $('categories').addEventListener('change', (e) => {
+            if (!e.target.matches('.device-input')) return;
+            e.target.checked ? selected.add(e.target.value) : selected.delete(e.target.value);
+            update();
         });
 
-        // --- Initial Call ---
-        
-        // Run on page load to set the initial state
-        handleSelectionChange();
+        $('categories').addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-remove]');
+            if (!btn) return;
+            e.preventDefault();
+            const id = btn.dataset.remove;
+            const i = custom.findIndex(d => d.id === id);
+            if (i >= 0) custom.splice(i, 1);
+            selected.delete(id);
+            renderDevices();
+            update();
+        });
+
+        $('search').addEventListener('input', applySearch);
+
+        document.querySelectorAll('.region-btn').forEach(btn => btn.addEventListener('click', () => {
+            if (btn.dataset.region === region) return;
+            region = btn.dataset.region;
+            store.set('region', region);
+            // Custom prices were entered in the other currency, so drop them.
+            custom.forEach(d => selected.delete(d.id));
+            custom.length = 0;
+            renderStatic();
+            renderDevices();
+            update();
+        }));
+
+        $('custom-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = $('custom-name').value.trim();
+            const price = parseFloat($('custom-price').value);
+            if (!name || !(price >= 0)) return;
+            const id = `custom${++customCount}`;
+            custom.push({ id, name, price });
+            selected.add(id);
+            e.target.reset();
+            renderDevices();
+            update();
+        });
+
+        document.querySelectorAll('.clear-btn').forEach(btn => btn.addEventListener('click', () => {
+            selected.clear();
+            renderDevices();
+            update();
+        }));
+
+        // --- Init ---
+        renderTabs();
+        renderStatic();
+        renderDevices();
+        update();
     </script>
     <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
-<script>
-  kofiWidgetOverlay.draw('sp3lllz', {
-    'type': 'floating-chat',
-    'floating-chat.donateButton.text': 'Support me',
-    'floating-chat.donateButton.background-color': '#ffffff',
-    'floating-chat.donateButton.text-color': '#323842'
-  });
-</script>
+    <script>
+      kofiWidgetOverlay.draw('sp3lllz', {
+        'type': 'floating-chat',
+        'floating-chat.donateButton.text': 'Support me',
+        'floating-chat.donateButton.background-color': '#ffffff',
+        'floating-chat.donateButton.text-color': '#323842'
+      });
+    </script>
 
 </body>
 </html>
