@@ -26,6 +26,8 @@
         @media (prefers-color-scheme: dark) {
             .device-input:checked + .device-card { background-color: rgba(79, 70, 229, .18); }
         }
+        .qty { display: none; }
+        .device-input:checked + .device-card .qty { display: inline-flex; }
         .tick { opacity: 0; transform: scale(.6); transition: all .15s; }
         .region-btn[aria-pressed="true"] { background: #fff; color: #111827; box-shadow: 0 1px 2px rgba(0,0,0,.1); }
         @media (prefers-color-scheme: dark) {
@@ -48,10 +50,8 @@
                 </p>
             </div>
             <div class="flex flex-col items-start md:items-end gap-2">
-                <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Region</span>
-                <div class="inline-flex p-1 rounded-xl bg-gray-200/70 dark:bg-gray-800" role="group" aria-label="Choose region">
-                    <button type="button" data-region="us" class="region-btn px-4 py-2 rounded-lg text-sm font-semibold text-gray-600 dark:text-gray-300 transition">🇺🇸 United States</button>
-                    <button type="button" data-region="uk" class="region-btn px-4 py-2 rounded-lg text-sm font-semibold text-gray-600 dark:text-gray-300 transition">🇬🇧 United Kingdom</button>
+                <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Region: <span id="region-name" class="text-gray-700 dark:text-gray-200"></span></span>
+                <div id="region-buttons" class="flex flex-wrap gap-1 p-1 rounded-xl bg-gray-200/70 dark:bg-gray-800" role="group" aria-label="Choose region">
                 </div>
             </div>
         </div>
@@ -141,8 +141,8 @@
     <script>
         // ---------------------------------------------------------------
         // Pricing data. Edit prices here.
-        // Each device: [id, name, usPrice, ukPrice, flags]
-        //   flags: 'u' = US price is an estimate, 'k' = UK price is an estimate
+        // Each device: [id, name, { us, uk, au, fr, de } monthly prices, estimated]
+        //   estimated: space-separated regions whose price is an estimate
         // iPhone, iPad and Apple Watch use AppleCare+ with Theft & Loss prices
         // where available, since AppleCare One includes theft & loss for them.
         // ---------------------------------------------------------------
@@ -150,6 +150,7 @@
 
         const REGIONS = {
             us: {
+                name: 'United States', flag: '🇺🇸',
                 locale: 'en-US', currency: 'USD', symbol: '$',
                 onePrice: 19.99,      // covers up to 3 devices
                 extraDevice: 5.99,    // each device after the first 3
@@ -162,6 +163,7 @@
                 ],
             },
             uk: {
+                name: 'United Kingdom', flag: '🇬🇧',
                 locale: 'en-GB', currency: 'GBP', symbol: '£',
                 onePrice: 16.99,
                 extraDevice: 4.99,
@@ -172,65 +174,101 @@
                     'Devices you already own can be added if they are up to 4 years old and in good condition.',
                 ],
             },
+            au: {
+                name: 'Australia', flag: '🇦🇺',
+                locale: 'en-AU', numberLocale: 'en-US', currency: 'AUD', symbol: 'A$',
+                onePrice: 29.99,
+                extraDevice: 8.99,
+                notes: [
+                    'AppleCare One costs A$29.99/month for up to 3 devices, plus A$8.99/month for each extra device. It launched in Australia in August 2026.',
+                    'iPhone prices are AppleCare+ with Theft & Loss, because AppleCare One includes theft & loss for iPhone, iPad and Apple Watch.',
+                    'Apple only publishes some Australian monthly prices, so many are estimates. Check what Apple quotes you.',
+                    'Devices you already own can be added if they are up to 4 years old and in good condition.',
+                ],
+            },
+            fr: {
+                name: 'France', flag: '🇫🇷',
+                locale: 'fr-FR', currency: 'EUR', symbol: '€',
+                onePrice: 20.99,
+                extraDevice: 5.99,
+                notes: [
+                    'AppleCare One costs €20.99/month for up to 3 devices, plus €5.99/month for each extra device. It launched in France in August 2026.',
+                    'iPhone prices are AppleCare+ with Theft & Loss, because AppleCare One includes theft & loss for iPhone, iPad and Apple Watch.',
+                    'Apple only publishes some French monthly prices, so many are estimates. Check what Apple quotes you.',
+                    'Devices you already own can be added if they are up to 4 years old and in good condition.',
+                ],
+            },
+            de: {
+                name: 'Germany', flag: '🇩🇪',
+                locale: 'de-DE', currency: 'EUR', symbol: '€',
+                onePrice: 20.99,
+                extraDevice: 5.99,
+                notes: [
+                    'AppleCare One costs €20.99/month for up to 3 devices, plus €5.99/month for each extra device. It launched in Germany in August 2026.',
+                    'iPhone prices are AppleCare+ with Theft & Loss (including 19% insurance tax), because AppleCare One includes theft & loss for iPhone, iPad and Apple Watch.',
+                    'Apple only publishes some German monthly prices, so many are estimates. Check what Apple quotes you.',
+                    'Devices you already own can be added if they are up to 4 years old and in good condition.',
+                ],
+            },
         };
 
         const CATEGORIES = [
             { id: 'iphone', name: 'iPhone', icon: '📱', devices: [
-                ['ip18pm', 'iPhone 18 Pro Max', 14.99, 12.99, 'uk'],
-                ['ip18p',  'iPhone 18 Pro',     14.99, 12.99, 'uk'],
-                ['ip17pm', 'iPhone 17 Pro Max', 13.99, 11.99],
-                ['ip17p',  'iPhone 17 Pro',     13.99, 11.99],
-                ['ipair',  'iPhone Air',        13.99, 11.99],
-                ['ip17',   'iPhone 17',         11.99,  9.49],
-                ['ip17e',  'iPhone 17e',        10.99,  7.99, 'u'],
-                ['ip16pm', 'iPhone 16 Pro Max', 13.99, 11.99],
-                ['ip16p',  'iPhone 16 Pro',     13.99, 11.99],
-                ['ip16pl', 'iPhone 16 Plus',    12.99, 10.99],
-                ['ip16',   'iPhone 16',         11.99,  9.49],
-                ['ip16e',  'iPhone 16e',         9.99,  7.99],
-                ['ip15pm', 'iPhone 15 Pro Max', 13.99, 11.99],
-                ['ip15p',  'iPhone 15 Pro',     13.99, 11.99],
-                ['ip15pl', 'iPhone 15 Plus',    12.99, 10.99],
-                ['ip15',   'iPhone 15',         11.99,  9.49],
-                ['ip14pm', 'iPhone 14 Pro Max', 13.99, 11.99],
-                ['ip14p',  'iPhone 14 Pro',     13.99, 11.99],
-                ['ip14pl', 'iPhone 14 Plus',    12.99, 10.99],
-                ['ip14',   'iPhone 14',         11.99,  9.49],
+                ['ip18pm', 'iPhone 18 Pro Max', { us: 14.99, uk: 12.99, au: 22.49, fr: 14.99, de: 14.99 }, 'us uk au fr de'],
+                ['ip18p', 'iPhone 18 Pro', { us: 14.99, uk: 12.99, au: 22.49, fr: 14.99, de: 14.99 }, 'us uk fr de'],
+                ['ip17pm', 'iPhone 17 Pro Max', { us: 13.99, uk: 11.99, au: 22.49, fr: 14.99, de: 14.99 }, 'au'],
+                ['ip17p', 'iPhone 17 Pro', { us: 13.99, uk: 11.99, au: 22.49, fr: 14.99, de: 14.99 }, 'au'],
+                ['ipair', 'iPhone Air', { us: 13.99, uk: 11.99, au: 22.49, fr: 14.99, de: 14.99 }, 'fr de'],
+                ['ip17', 'iPhone 17', { us: 11.99, uk:  9.49, au: 17.99, fr: 11.99, de: 11.49 }],
+                ['ip17e', 'iPhone 17e', { us: 10.99, uk:  7.99, au: 16.49, fr:  9.99, de:  9.49 }, 'us fr de'],
+                ['ip16pm', 'iPhone 16 Pro Max', { us: 13.99, uk: 11.99, au: 22.49, fr: 14.99, de: 14.99 }, 'au fr de'],
+                ['ip16p', 'iPhone 16 Pro', { us: 13.99, uk: 11.99, au: 22.49, fr: 14.99, de: 14.99 }, 'au fr de'],
+                ['ip16pl', 'iPhone 16 Plus', { us: 12.99, uk: 10.99, au: 19.99, fr: 12.99, de: 12.49 }, 'au fr de'],
+                ['ip16', 'iPhone 16', { us: 11.99, uk:  9.49, au: 17.99, fr: 11.99, de: 11.49 }, 'fr de'],
+                ['ip16e', 'iPhone 16e', { us:  9.99, uk:  7.99, au: 14.49, fr:  9.99, de:  9.49 }, 'au fr de'],
+                ['ip15pm', 'iPhone 15 Pro Max', { us: 13.99, uk: 11.99, au: 22.49, fr: 14.99, de: 14.99 }, 'au fr de'],
+                ['ip15p', 'iPhone 15 Pro', { us: 13.99, uk: 11.99, au: 22.49, fr: 14.99, de: 14.99 }, 'au fr de'],
+                ['ip15pl', 'iPhone 15 Plus', { us: 12.99, uk: 10.99, au: 19.99, fr: 12.99, de: 12.49 }, 'au fr de'],
+                ['ip15', 'iPhone 15', { us: 11.99, uk:  9.49, au: 17.99, fr: 11.99, de: 11.49 }, 'au fr de'],
+                ['ip14pm', 'iPhone 14 Pro Max', { us: 13.99, uk: 11.99, au: 22.49, fr: 14.99, de: 14.99 }, 'au fr de'],
+                ['ip14p', 'iPhone 14 Pro', { us: 13.99, uk: 11.99, au: 22.49, fr: 14.99, de: 14.99 }, 'au fr de'],
+                ['ip14pl', 'iPhone 14 Plus', { us: 12.99, uk: 10.99, au: 19.99, fr: 12.99, de: 12.49 }, 'au fr de'],
+                ['ip14', 'iPhone 14', { us: 11.99, uk:  9.49, au: 17.99, fr: 11.99, de: 11.49 }, 'au fr de'],
             ]},
             { id: 'ipad', name: 'iPad', icon: '📲', devices: [
-                ['ipadpro13', 'iPad Pro 13-inch', 11.99, 8.49, 'k'],
-                ['ipadpro11', 'iPad Pro 11-inch', 10.99, 7.49, 'k'],
-                ['ipadair13', 'iPad Air 13-inch',  7.99, 4.99, 'k'],
-                ['ipadair11', 'iPad Air 11-inch',  6.99, 3.99, 'k'],
-                ['ipad',      'iPad',              5.99, 3.49],
-                ['ipadmini',  'iPad mini',         5.99, 3.49],
+                ['ipadpro13', 'iPad Pro 13-inch', { us: 11.99, uk:  8.49, au: 17.99, fr: 11.99, de: 11.99 }, 'uk au fr de'],
+                ['ipadpro11', 'iPad Pro 11-inch', { us: 10.99, uk:  7.49, au: 16.49, fr: 10.99, de: 10.99 }, 'uk au fr de'],
+                ['ipadair13', 'iPad Air 13-inch', { us:  7.99, uk:  4.99, au: 11.99, fr:  7.99, de:  7.99 }, 'uk au fr de'],
+                ['ipadair11', 'iPad Air 11-inch', { us:  6.99, uk:  3.99, au: 10.49, fr:  6.99, de:  6.99 }, 'uk au fr de'],
+                ['ipad', 'iPad', { us:  5.99, uk:  3.49, au:  8.99, fr:  5.99, de:  5.99 }, 'au fr de'],
+                ['ipadmini', 'iPad mini', { us:  5.99, uk:  3.49, au:  8.99, fr:  5.99, de:  5.99 }, 'au fr de'],
             ]},
             { id: 'mac', name: 'Mac', icon: '💻', devices: [
-                ['mbneo',  'MacBook Neo',            5.99,  4.99, 'k'],
-                ['mba13',  'MacBook Air 13-inch',    7.99,  6.99, 'k'],
-                ['mba15',  'MacBook Air 15-inch',    8.99,  7.99, 'k'],
-                ['mbp14',  'MacBook Pro 14-inch',   10.99,  9.99, 'k'],
-                ['mbp16',  'MacBook Pro 16-inch',   15.99, 14.99, 'k'],
-                ['imac',   'iMac',                   6.99,  6.99, 'k'],
-                ['macmini','Mac mini',               4.49,  3.99, 'k'],
-                ['studio', 'Mac Studio',             6.99,  6.99, 'k'],
-                ['macpro', 'Mac Pro',               18.49, 16.99, 'k'],
+                ['mbneo', 'MacBook Neo', { us:  5.99, uk:  4.99, au:  8.99, fr:  5.99, de:  5.99 }, 'uk au fr de'],
+                ['mba13', 'MacBook Air 13-inch', { us:  7.99, uk:  6.99, au: 11.99, fr:  7.99, de:  7.99 }, 'uk au fr de'],
+                ['mba15', 'MacBook Air 15-inch', { us:  8.99, uk:  7.99, au: 13.49, fr:  8.99, de:  8.99 }, 'uk au fr de'],
+                ['mbp14', 'MacBook Pro 14-inch', { us: 10.99, uk:  9.99, au: 16.49, fr: 10.99, de: 10.99 }, 'uk au fr de'],
+                ['mbp16', 'MacBook Pro 16-inch', { us: 15.99, uk: 14.99, au: 23.99, fr: 15.99, de: 15.99 }, 'uk au fr de'],
+                ['imac', 'iMac', { us:  6.99, uk:  6.99, au: 10.49, fr:  6.99, de:  6.99 }, 'uk au fr de'],
+                ['macmini', 'Mac mini', { us:  4.49, uk:  3.99, au:  6.99, fr:  4.49, de:  4.49 }, 'uk au fr de'],
+                ['studio', 'Mac Studio', { us:  6.99, uk:  6.99, au: 10.49, fr:  6.99, de:  6.99 }, 'uk au fr de'],
+                ['macpro', 'Mac Pro', { us: 18.49, uk: 16.99, au: 27.99, fr: 18.49, de: 18.49 }, 'uk au fr de'],
             ]},
             { id: 'watch', name: 'Apple Watch', icon: '⌚', devices: [
-                ['wultra4', 'Apple Watch Ultra 4',          5.99, 4.99, 'u'],
-                ['wultra',  'Apple Watch Ultra 2 / 3',      5.99, 4.99],
-                ['ws12',    'Apple Watch Series 12',        4.99, 3.99, 'u'],
-                ['ws',      'Apple Watch Series 9 / 10 / 11', 4.99, 3.99],
-                ['wse',     'Apple Watch SE',               2.99, 2.49],
+                ['wultra4', 'Apple Watch Ultra 4', { us:  5.99, uk:  4.99, au:  8.99, fr:  5.99, de:  5.99 }, 'us au fr de'],
+                ['wultra', 'Apple Watch Ultra 2 / 3', { us:  5.99, uk:  4.99, au:  8.99, fr:  5.99, de:  5.99 }, 'au fr de'],
+                ['ws12', 'Apple Watch Series 12', { us:  4.99, uk:  3.99, au:  7.49, fr:  4.99, de:  4.99 }, 'us au fr de'],
+                ['ws', 'Apple Watch Series 9 / 10 / 11', { us:  4.99, uk:  3.99, au:  7.49, fr:  4.99, de:  4.99 }, 'au fr de'],
+                ['wse', 'Apple Watch SE', { us:  2.99, uk:  2.49, au:  5.99, fr:  2.99, de:  2.99 }, 'au fr de'],
             ]},
             { id: 'audio', name: 'AirPods & Displays', icon: '🎧', devices: [
-                ['apmax',  'AirPods Max',      2.46, 2.99, 'uk'],
-                ['appro3', 'AirPods Pro 3',    1.63, 1.99, 'u'],
-                ['appro2', 'AirPods Pro 2',    1.21, 1.99, 'uk'],
-                ['ap5',    'AirPods 5',        1.21, 1.99, 'uk'],
-                ['ap4',    'AirPods 4',        1.21, 1.99, 'uk'],
-                ['studiodisplay', 'Studio Display', 4.99, 4.99, 'k'],
-                ['xdr',    'Pro Display XDR', 14.99, 14.99, 'uk'],
+                ['apmax', 'AirPods Max', { us:  2.46, uk:  2.99, au:  3.99, fr:  2.99, de:  2.99 }, 'us uk au fr de'],
+                ['appro3', 'AirPods Pro 3', { us:  1.63, uk:  1.99, au:  2.99, fr:  1.99, de:  1.99 }, 'us au fr de'],
+                ['appro2', 'AirPods Pro 2', { us:  1.21, uk:  1.99, au:  2.99, fr:  1.99, de:  1.99 }, 'us uk au fr de'],
+                ['ap5', 'AirPods 5', { us:  1.21, uk:  1.99, au:  2.99, fr:  1.99, de:  1.99 }, 'us uk au fr de'],
+                ['ap4', 'AirPods 4', { us:  1.21, uk:  1.99, au:  2.99, fr:  1.99, de:  1.99 }, 'us uk au fr de'],
+                ['studiodisplay', 'Studio Display', { us:  4.99, uk:  4.99, au:  7.49, fr:  4.99, de:  4.99 }, 'uk au fr de'],
+                ['xdr', 'Pro Display XDR', { us: 14.99, uk: 14.99, au: 22.49, fr: 14.99, de: 14.99 }, 'us uk au fr de'],
             ]},
         ];
 
@@ -241,27 +279,35 @@
         };
         const detectRegion = () => {
             const q = new URLSearchParams(location.search).get('region');
-            if (q === 'us' || q === 'uk') return q;
+            if (REGIONS[q]) return q;
             const saved = store.get('region');
-            if (saved === 'us' || saved === 'uk') return saved;
-            return /-(GB|UK)$/i.test(navigator.language || '') ? 'uk' : 'us';
+            if (REGIONS[saved]) return saved;
+            const country = ((navigator.language || '').split('-')[1] || '').toLowerCase();
+            const fromLang = country === 'gb' ? 'uk' : country;
+            return REGIONS[fromLang] ? fromLang : 'us';
         };
         let region = detectRegion();
-        const selected = new Set();
+        const selected = new Map(); // device id -> quantity
         const custom = []; // { id, name, price } – price in current region's currency
         let customCount = 0;
 
         // --- Helpers ---
         const $ = (id) => document.getElementById(id);
-        const fmt = (n) => new Intl.NumberFormat(REGIONS[region].locale, { style: 'currency', currency: REGIONS[region].currency }).format(n);
+        const fmt = (n) => new Intl.NumberFormat(REGIONS[region].numberLocale || REGIONS[region].locale, { style: 'currency', currency: REGIONS[region].currency }).format(n);
         const allDevices = () => CATEGORIES.flatMap(c => c.devices.map(d => ({
             id: d[0], name: d[1],
-            price: region === 'us' ? d[2] : d[3],
-            est: (d[4] || '').includes(region === 'us' ? 'u' : 'k'),
+            price: d[2][region],
+            est: (d[3] || '').split(' ').includes(region),
         })));
         const escapeHtml = (s) => s.replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
 
         // --- Rendering ---
+        function renderRegionButtons() {
+            $('region-buttons').innerHTML = Object.entries(REGIONS).map(([key, r]) =>
+                `<button type="button" data-region="${key}" title="${r.name}" class="region-btn px-3 py-2 rounded-lg text-sm font-semibold text-gray-600 dark:text-gray-300 transition">${r.flag} ${key.toUpperCase()}</button>`
+            ).join('');
+        }
+
         function renderTabs() {
             $('category-tabs').innerHTML = CATEGORIES.map(c =>
                 `<a href="#cat-${c.id}" class="shrink-0 px-3 py-2 rounded-xl text-sm font-medium bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-indigo-400 whitespace-nowrap">${c.icon} ${c.name}</a>`
@@ -275,7 +321,14 @@
                     <label for="d-${id}" class="device-card h-full flex items-center justify-between gap-3 p-4 rounded-xl border-2 border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 cursor-pointer hover:border-indigo-400">
                         <span class="flex items-center gap-2 min-w-0">
                             <span class="tick shrink-0 w-5 h-5 rounded-full bg-indigo-600 text-white grid place-items-center text-xs">✓</span>
-                            <span class="font-medium leading-snug">${escapeHtml(name)}</span>
+                            <span class="flex flex-col items-start gap-1.5">
+                                <span class="font-medium leading-snug">${escapeHtml(name)}</span>
+                                <span class="qty items-center rounded-lg border border-indigo-200 dark:border-indigo-800 bg-white dark:bg-gray-900 text-sm">
+                                    <button type="button" data-qty="-1" data-id="${id}" class="w-7 h-7 font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-gray-800 rounded-l-lg" aria-label="One fewer ${escapeHtml(name)}">−</button>
+                                    <span class="qty-value w-7 text-center font-semibold tabular-nums" aria-live="polite">${selected.get(id) || 1}</span>
+                                    <button type="button" data-qty="1" data-id="${id}" class="w-7 h-7 font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-gray-800 rounded-r-lg" aria-label="One more ${escapeHtml(name)}">+</button>
+                                </span>
+                            </span>
                         </span>
                         <span class="flex items-center gap-1.5 shrink-0">
                             ${est ? '<span class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300" title="Estimated price">est</span>' : ''}
@@ -313,6 +366,7 @@
             const r = REGIONS[region];
             document.documentElement.lang = r.locale;
             document.querySelectorAll('.region-btn').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.region === region)));
+            $('region-name').textContent = r.name;
             $('one-price-inline').textContent = `${fmt(r.onePrice)}/month`;
             $('custom-currency').textContent = r.symbol;
             $('notes').innerHTML = r.notes.map(n => `<li>${escapeHtml(n)}</li>`).join('');
@@ -323,15 +377,15 @@
         function update() {
             const r = REGIONS[region];
             const lookup = Object.fromEntries([...allDevices(), ...custom].map(d => [d.id, d]));
-            const items = [...selected].map(id => lookup[id]).filter(Boolean);
-            const count = items.length;
-            const individual = items.reduce((s, d) => s + d.price, 0);
+            const items = [...selected].filter(([id]) => lookup[id]).map(([id, qty]) => ({ ...lookup[id], qty }));
+            const count = items.reduce((s, d) => s + d.qty, 0);
+            const individual = items.reduce((s, d) => s + d.price * d.qty, 0);
             const extras = Math.max(0, count - 3);
             const one = count ? r.onePrice + extras * r.extraDevice : 0;
             const diff = individual - one;
 
             $('selected-list').innerHTML = count
-                ? items.map(d => `<li class="flex justify-between gap-2"><span class="truncate">${escapeHtml(d.name)}</span><span class="tabular-nums text-gray-500 dark:text-gray-400">${fmt(d.price)}</span></li>`).join('')
+                ? items.map(d => `<li class="flex justify-between gap-2"><span class="truncate">${d.qty > 1 ? `<span class="font-semibold text-indigo-600 dark:text-indigo-400">${d.qty}×</span> ` : ''}${escapeHtml(d.name)}</span><span class="tabular-nums text-gray-500 dark:text-gray-400">${fmt(d.price * d.qty)}</span></li>`).join('')
                 : '<li class="text-gray-400">Nothing selected yet.</li>';
             $('sum-individual').textContent = `${fmt(individual)}/mo`;
             $('sum-one').textContent = `${fmt(one)}/mo`;
@@ -389,11 +443,28 @@
         // --- Events ---
         $('categories').addEventListener('change', (e) => {
             if (!e.target.matches('.device-input')) return;
-            e.target.checked ? selected.add(e.target.value) : selected.delete(e.target.value);
+            e.target.checked ? selected.set(e.target.value, 1) : selected.delete(e.target.value);
+            e.target.closest('.device').querySelector('.qty-value').textContent = 1;
             update();
         });
 
         $('categories').addEventListener('click', (e) => {
+            const qtyBtn = e.target.closest('[data-qty]');
+            if (qtyBtn) {
+                e.preventDefault();
+                const id = qtyBtn.dataset.id;
+                const qty = (selected.get(id) || 0) + Number(qtyBtn.dataset.qty);
+                const card = qtyBtn.closest('.device');
+                if (qty < 1) {
+                    selected.delete(id);
+                    card.querySelector('.device-input').checked = false;
+                } else {
+                    selected.set(id, Math.min(qty, 20));
+                    card.querySelector('.qty-value').textContent = selected.get(id);
+                }
+                update();
+                return;
+            }
             const btn = e.target.closest('[data-remove]');
             if (!btn) return;
             e.preventDefault();
@@ -407,8 +478,9 @@
 
         $('search').addEventListener('input', applySearch);
 
-        document.querySelectorAll('.region-btn').forEach(btn => btn.addEventListener('click', () => {
-            if (btn.dataset.region === region) return;
+        $('region-buttons').addEventListener('click', (e) => {
+            const btn = e.target.closest('.region-btn');
+            if (!btn || btn.dataset.region === region) return;
             region = btn.dataset.region;
             store.set('region', region);
             // Custom prices were entered in the other currency, so drop them.
@@ -417,7 +489,7 @@
             renderStatic();
             renderDevices();
             update();
-        }));
+        });
 
         $('custom-form').addEventListener('submit', (e) => {
             e.preventDefault();
@@ -426,7 +498,7 @@
             if (!name || !(price >= 0)) return;
             const id = `custom${++customCount}`;
             custom.push({ id, name, price });
-            selected.add(id);
+            selected.set(id, 1);
             e.target.reset();
             renderDevices();
             update();
@@ -439,6 +511,7 @@
         }));
 
         // --- Init ---
+        renderRegionButtons();
         renderTabs();
         renderStatic();
         renderDevices();
