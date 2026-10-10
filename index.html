@@ -26,6 +26,8 @@
         @media (prefers-color-scheme: dark) {
             .device-input:checked + .device-card { background-color: rgba(79, 70, 229, .18); }
         }
+        .qty { display: none; }
+        .device-input:checked + .device-card .qty { display: inline-flex; }
         .tick { opacity: 0; transform: scale(.6); transition: all .15s; }
         .region-btn[aria-pressed="true"] { background: #fff; color: #111827; box-shadow: 0 1px 2px rgba(0,0,0,.1); }
         @media (prefers-color-scheme: dark) {
@@ -247,7 +249,7 @@
             return /-(GB|UK)$/i.test(navigator.language || '') ? 'uk' : 'us';
         };
         let region = detectRegion();
-        const selected = new Set();
+        const selected = new Map(); // device id -> quantity
         const custom = []; // { id, name, price } – price in current region's currency
         let customCount = 0;
 
@@ -275,7 +277,14 @@
                     <label for="d-${id}" class="device-card h-full flex items-center justify-between gap-3 p-4 rounded-xl border-2 border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 cursor-pointer hover:border-indigo-400">
                         <span class="flex items-center gap-2 min-w-0">
                             <span class="tick shrink-0 w-5 h-5 rounded-full bg-indigo-600 text-white grid place-items-center text-xs">✓</span>
-                            <span class="font-medium leading-snug">${escapeHtml(name)}</span>
+                            <span class="flex flex-col items-start gap-1.5">
+                                <span class="font-medium leading-snug">${escapeHtml(name)}</span>
+                                <span class="qty items-center rounded-lg border border-indigo-200 dark:border-indigo-800 bg-white dark:bg-gray-900 text-sm">
+                                    <button type="button" data-qty="-1" data-id="${id}" class="w-7 h-7 font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-gray-800 rounded-l-lg" aria-label="One fewer ${escapeHtml(name)}">−</button>
+                                    <span class="qty-value w-7 text-center font-semibold tabular-nums" aria-live="polite">${selected.get(id) || 1}</span>
+                                    <button type="button" data-qty="1" data-id="${id}" class="w-7 h-7 font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-gray-800 rounded-r-lg" aria-label="One more ${escapeHtml(name)}">+</button>
+                                </span>
+                            </span>
                         </span>
                         <span class="flex items-center gap-1.5 shrink-0">
                             ${est ? '<span class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300" title="Estimated price">est</span>' : ''}
@@ -323,15 +332,15 @@
         function update() {
             const r = REGIONS[region];
             const lookup = Object.fromEntries([...allDevices(), ...custom].map(d => [d.id, d]));
-            const items = [...selected].map(id => lookup[id]).filter(Boolean);
-            const count = items.length;
-            const individual = items.reduce((s, d) => s + d.price, 0);
+            const items = [...selected].filter(([id]) => lookup[id]).map(([id, qty]) => ({ ...lookup[id], qty }));
+            const count = items.reduce((s, d) => s + d.qty, 0);
+            const individual = items.reduce((s, d) => s + d.price * d.qty, 0);
             const extras = Math.max(0, count - 3);
             const one = count ? r.onePrice + extras * r.extraDevice : 0;
             const diff = individual - one;
 
             $('selected-list').innerHTML = count
-                ? items.map(d => `<li class="flex justify-between gap-2"><span class="truncate">${escapeHtml(d.name)}</span><span class="tabular-nums text-gray-500 dark:text-gray-400">${fmt(d.price)}</span></li>`).join('')
+                ? items.map(d => `<li class="flex justify-between gap-2"><span class="truncate">${d.qty > 1 ? `<span class="font-semibold text-indigo-600 dark:text-indigo-400">${d.qty}×</span> ` : ''}${escapeHtml(d.name)}</span><span class="tabular-nums text-gray-500 dark:text-gray-400">${fmt(d.price * d.qty)}</span></li>`).join('')
                 : '<li class="text-gray-400">Nothing selected yet.</li>';
             $('sum-individual').textContent = `${fmt(individual)}/mo`;
             $('sum-one').textContent = `${fmt(one)}/mo`;
@@ -389,11 +398,28 @@
         // --- Events ---
         $('categories').addEventListener('change', (e) => {
             if (!e.target.matches('.device-input')) return;
-            e.target.checked ? selected.add(e.target.value) : selected.delete(e.target.value);
+            e.target.checked ? selected.set(e.target.value, 1) : selected.delete(e.target.value);
+            e.target.closest('.device').querySelector('.qty-value').textContent = 1;
             update();
         });
 
         $('categories').addEventListener('click', (e) => {
+            const qtyBtn = e.target.closest('[data-qty]');
+            if (qtyBtn) {
+                e.preventDefault();
+                const id = qtyBtn.dataset.id;
+                const qty = (selected.get(id) || 0) + Number(qtyBtn.dataset.qty);
+                const card = qtyBtn.closest('.device');
+                if (qty < 1) {
+                    selected.delete(id);
+                    card.querySelector('.device-input').checked = false;
+                } else {
+                    selected.set(id, Math.min(qty, 20));
+                    card.querySelector('.qty-value').textContent = selected.get(id);
+                }
+                update();
+                return;
+            }
             const btn = e.target.closest('[data-remove]');
             if (!btn) return;
             e.preventDefault();
@@ -426,7 +452,7 @@
             if (!name || !(price >= 0)) return;
             const id = `custom${++customCount}`;
             custom.push({ id, name, price });
-            selected.add(id);
+            selected.set(id, 1);
             e.target.reset();
             renderDevices();
             update();
